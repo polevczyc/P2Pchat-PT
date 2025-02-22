@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P2P Chat</title>
+    <style>
+        body, html {
+            font-family: Arial, Helvetica, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #222;
+            height: 100%;
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 18px;
+        }
+        *, *::before, *::after {
+            box-sizing: inherit;
+        }
+        .container {
+            margin: 20px;
+            padding: 20px;
+            background-color: #e8e8e8;
+            border-radius: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-wrap: wrap;
+            height: calc(100% - 40px);
+            width: calc(100% - 40px);
+            overflow: auto;
+        }
+        
+        /* welcome screen */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+            overflow: auto;
+        }
+        .welcomePageMain {
+            flex: 1 1 50%;
+            box-sizing: border-box;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .welcomePageLogo, .videoSection {
+            flex: 1 1 50%;
+            box-sizing: border-box;
+            padding: 30px;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        @media (max-width: 1000px) {
+            .welcomePageMain, .welcomePageLogo, .chatSection, .videoSection {
+                flex: 1 1 100%;
+            }
+            .welcomePageLogo, .videoSection {
+                order: -1;
+            }
+        }
+        #logo {
+            width: 350px;
+        }
+        /* chat screen */
+        .hidden {
+            display: none;
+        }
+
+        .form-group {
+            margin: 15px;
+            padding: 5px;
+        }
+        input[type="text"], input[type="file"], input[type="text"]:focus, input[type="file"]:focus {
+            border-radius: 20px;
+            width: calc(100% - 70px);
+            padding: 10px;
+            margin: 8px;
+            background-color: #cdcdcd;
+            border: none;
+            outline: none;
+            font-size: 18px;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        button {
+            padding: 8px 15px;
+            background-color: #5271FF;
+            color: #fff;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        button:hover {
+            background-color: #3050dd;
+        }
+        a {
+            display: block;
+            margin-top: 5px;
+        }
+        .chatSection {
+            padding: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            flex-direction: column;
+            height: 100%;
+            width: 60%;
+        }
+        .videoSection {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            max-width: 100%;
+            overflow: hidden;
+        }
+        .chatPage {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        #enterButton {
+            font-size: 50px;
+            border-radius: 50px;
+            margin: 15px;
+            width: 80px;
+            height: 80px;
+        }
+        #messages {
+            overflow: auto;
+            padding: 20px;
+            background-color: #cdcdcd;
+            border-radius: 20px;
+            height: 100%;
+            flex: 1;
+            font-size: 30px;
+        }
+        #yourMessage {
+            background-color: #cdcdcd;
+            margin-top: 20px;
+            padding: 8px;
+            border-radius: 20px;
+            height: 50px;
+            display: flex;
+        }
+
+        #enterVideoChat, #sendFile {
+            width: 150px;
+            height: 150px;
+        }
+        #my-video, #remote-video {
+            max-height: 300px;;
+        }
+        #videoChatPage {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            max-width: 100%;
+        }
+
+
+    </style>
+</head>
+<body>
+    <div id="welcomePage" class="overlay">
+        <div class="container">
+            <div class="welcomePageMain">
+                <p>
+                    <span style="font-size: 72px;">welcome to </span><br>
+                    <span style="font-size: 72px; font-weight: bold; font-style: italic; color: #5271FF;">P2Pmsngr.</span>
+                </p>
+                <p>
+                    <span style="font-size: 20px; font-style: italic;">your ID:</span>
+                    <label for="your-id"></label>
+                    <input type="text" id="my-id" size="25" readonly>
+                    <button id="copy">copy</button> 
+                </p>
+                <p>
+                    <span style="font-size: 20px; font-style: italic;">connect to:</span>
+                    <label for="connect-to"></label>
+                    <input type="text" id="connect-to" size="20">
+                    <button id="connect">connect</button>
+                </p>
+                <span style="font-style: italic; color: grey">
+                    <div id="active-connections">Waiting for connection...</div>
+                </span>
+
+                <button id="enterButton">></button>
+            </div>
+            <div class="welcomePageLogo">
+                <img id="logo" src="logo.png" alt="logo">
+            </div>
+        </div>
+    </div>
+    <div class="chatPage" class="hidden">
+        <div class="container">
+            <div class="chatSection">
+                <div id="messages"></div>
+                <div id="yourMessage">
+                    <label for="message"></label>
+                    <input type="text" id="message" placeholder="Your message...">
+                    <button id="send">send</button>
+                </div>
+            </div>
+            <div class="videoSection">
+                <div class="form-group">
+                    <button id="enterVideoChat">Video Chat</button>
+                </div>
+                <div id="videoChatPage" class="hidden">    
+                    <div>
+                        <button id="connect-button">Connect</button>
+                        <button id="closeCall">Disconnect</button>
+                    </div>
+                    <div>
+                        <video id="my-video" autoplay muted></video>
+                        <video id="remote-video" autoplay></video>
+                    </div>
+            </div>
+            <div class="form-group">
+                <input type="file" id="fileInput" style="display: none;">
+                <button id="sendFile">Send File</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="chat.js"></script>
+</body>
+</html>
